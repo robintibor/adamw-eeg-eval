@@ -85,6 +85,7 @@ def load_train_valid_test(train_filename, test_filename, n_folds, i_test_fold,
     if test_filename is None:
         assert n_folds is not None
         assert i_test_fold is not None
+        assert valid_set_fraction is None
     else:
         assert n_folds is None
         assert i_test_fold is None
@@ -125,11 +126,11 @@ def load_train_valid_test(train_filename, test_filename, n_folds, i_test_fold,
             train_folds = np.setdiff1d(train_folds, [i_valid_fold])
             valid_set = fold_sets[i_valid_fold]
             assert i_valid_fold not in train_folds
+            assert i_test_fold != i_valid_fold
         else:
             valid_set = None
 
         assert i_test_fold not in train_folds
-        assert i_test_fold != i_valid_fold
 
         train_fold_sets = [fold_sets[i] for i in train_folds]
         train_set = concatenate_sets(train_fold_sets)
@@ -149,7 +150,7 @@ def load_train_valid_test(train_filename, test_filename, n_folds, i_test_fold,
 
 def run_4_sec_exp(train_filename, test_filename, n_folds,
                   i_test_fold, valid_set_fraction, use_validation_set,
-                  low_cut_hz, model_name, optimizer_name,
+                  low_cut_hz, model_name, optimizer_name, init_lr,
                   scheduler_name, use_norm_constraint,
                   weight_decay, max_epochs, max_increase_epochs,
                   np_th_seed,
@@ -164,10 +165,13 @@ def run_4_sec_exp(train_filename, test_filename, n_folds,
     if debug:
         max_epochs = 4
 
-    return run_experiment(train_set, valid_set, test_set,
-                   model_name, optimizer_name, scheduler_name=scheduler_name,
-                   use_norm_constraint=use_norm_constraint,
-                   weight_decay=weight_decay,
-                   max_epochs=max_epochs,
-                   max_increase_epochs=max_increase_epochs,
-                   np_th_seed=np_th_seed, )
+    return run_experiment(
+        train_set, valid_set, test_set,
+        model_name, optimizer_name,
+        init_lr=init_lr,
+        scheduler_name=scheduler_name,
+        use_norm_constraint=use_norm_constraint,
+        weight_decay=weight_decay,
+        max_epochs=max_epochs,
+        max_increase_epochs=max_increase_epochs,
+        np_th_seed=np_th_seed, )

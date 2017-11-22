@@ -29,7 +29,7 @@ def get_templates():
 def get_grid_param_list():
     dictlistprod = cartesian_dict_of_lists_product
     default_params = [{
-        'save_folder': './data/models/adameegeval/eegconvnet-paper-replication/',
+        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv/',
     }]
 
     train_test_filenames = [
@@ -104,10 +104,27 @@ def get_grid_param_list():
         'test_on_eval_set': [False],
     })
 
-    early_stop_params = [{
-        'valid_set_fraction': 0.8,
+
+    old_setup_params = [{
+        'valid_set_fraction': None,#0.8 for final eval
         'use_validation_set': True,
         'max_increase_epochs': 80,
+        'optimizer_name': 'adam',
+        'scheduler_name': None,
+        'use_norm_constraint': True,
+        'weight_decay': 0,
+        'init_lr': 1e-3,
+    }]
+
+    new_setup_params = [{
+        'valid_set_fraction': None,#0.8 for final eval
+        'use_validation_set': False,
+        'max_increase_epochs': None,
+        'optimizer_name': 'adamw',
+        'scheduler_name': 'cosine',
+        'use_norm_constraint': False,
+        'weight_decay': 1e-5,
+        'init_lr': 1e-3,
     }]
 
     seed_params = dictlistprod({
@@ -122,31 +139,23 @@ def get_grid_param_list():
         'max_epochs': 800,
     }]
 
-    optim_params = [{
-        'optimizer_name': 'adam',
-        'scheduler_name': None,
-        'use_norm_constraint': True,
-        'weight_decay': 0
-    }]
 
     model_params = dictlistprod({
         'model_name': ['deep', 'shallow']
     })
 
-
     debug_params = [{
         'debug': False,
     }]
-
 
     grid_params = product_of_list_of_lists_of_dicts([
         default_params,
         train_test_filenames,
         data_split_params,
-        early_stop_params,
+        #old_setup_params,
+        new_setup_params,
         preproc_params,
         model_params,
-        optim_params,
         stop_params,
         seed_params,
         debug_params,
@@ -165,7 +174,7 @@ def sample_config_params(rng, params):
 def run(
         ex, train_filename, test_filename, n_folds,
         i_test_fold, valid_set_fraction, use_validation_set,
-        low_cut_hz, model_name, optimizer_name,
+        low_cut_hz, model_name, optimizer_name, init_lr,
         scheduler_name, use_norm_constraint,
         weight_decay, max_epochs, max_increase_epochs,
         np_th_seed,

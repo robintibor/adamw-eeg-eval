@@ -9,15 +9,20 @@ from braindecode.torch_ext.util import np_to_var, var_to_np
 from braindecode.datautil.iterators import CropsFromTrialsIterator
 from braindecode.experiments.stopcriteria import MaxEpochs, NoDecrease, Or
 from adamweegeval.optimizers import AdamW
-from adamweegeval.schedulers import ScheduledOptimizer
+from adamweegeval.schedulers import ScheduledOptimizer, CosineAnnealing
 
+import torch.backends.cudnn
 
-def run_experiment(train_set, valid_set, test_set, model_name, optimizer_name,
-                   scheduler_name,
-                   use_norm_constraint, weight_decay,
-                   max_epochs,
-                   max_increase_epochs,
-                   np_th_seed):
+def run_experiment(
+        train_set, valid_set, test_set, model_name, optimizer_name,
+        init_lr,
+        scheduler_name,
+        use_norm_constraint, weight_decay,
+        max_epochs,
+        max_increase_epochs,
+        np_th_seed):
+    set_random_seeds(np_th_seed, cuda=True)
+    #torch.backends.cudnn.benchmark = True sometimes crashes?
     if valid_set is not None:
         assert max_increase_epochs is not None
     n_classes = int(np.max(train_set.y) + 1)
@@ -43,9 +48,11 @@ def run_experiment(train_set, valid_set, test_set, model_name, optimizer_name,
     from torch import optim
 
     if optimizer_name == 'adam':
-        optimizer = optim.Adam(model.parameters(), weight_decay=weight_decay)
+        optimizer = optim.Adam(model.parameters(), weight_decay=weight_decay,
+                               lr=init_lr)
     elif optimizer_name == 'adamw':
-        optimizer = AdamW(model.parameters(), weight_decay=weight_decay)
+        optimizer = AdamW(model.parameters(), weight_decay=weight_decay,
+                          lr=init_lr)
 
     iterator = CropsFromTrialsIterator(batch_size=60,
                                        input_time_length=input_time_length,
