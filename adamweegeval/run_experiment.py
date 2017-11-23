@@ -1,5 +1,8 @@
-import pandas as pd
 import numpy as np
+import torch.nn.functional as F
+import torch as th
+from torch import optim
+import torch.backends.cudnn
 from braindecode.torch_ext.util import set_random_seeds
 from braindecode.models.deep4 import Deep4Net
 from braindecode.models.shallow_fbcsp import ShallowFBCSPNet
@@ -8,10 +11,16 @@ from braindecode.experiments.experiment import Experiment
 from braindecode.torch_ext.util import np_to_var, var_to_np
 from braindecode.datautil.iterators import CropsFromTrialsIterator
 from braindecode.experiments.stopcriteria import MaxEpochs, NoDecrease, Or
+
+from braindecode.torch_ext.constraints import MaxNormDefaultConstraint
+from braindecode.experiments.monitors import LossMonitor, MisclassMonitor, \
+    RuntimeMonitor, CroppedTrialMisclassMonitor
+
 from adamweegeval.optimizers import AdamW
 from adamweegeval.schedulers import ScheduledOptimizer, CosineAnnealing
 
-import torch.backends.cudnn
+
+
 
 def run_experiment(
         train_set, valid_set, test_set, model_name, optimizer_name,
@@ -22,7 +31,7 @@ def run_experiment(
         max_increase_epochs,
         np_th_seed):
     set_random_seeds(np_th_seed, cuda=True)
-    torch.backends.cudnn.benchmark = True# sometimes crashes?
+    #torch.backends.cudnn.benchmark = True# sometimes crashes?
     if valid_set is not None:
         assert max_increase_epochs is not None
     n_classes = int(np.max(train_set.y) + 1)
@@ -45,7 +54,6 @@ def run_experiment(
 
     n_preds_per_input = out.cpu().data.numpy().shape[2]
 
-    from torch import optim
 
     if optimizer_name == 'adam':
         optimizer = optim.Adam(model.parameters(), weight_decay=weight_decay,
@@ -67,11 +75,6 @@ def run_experiment(
             optimizer = ScheduledOptimizer(scheduler, optimizer)
         else:
             raise ValueError("Unknown scheduler")
-
-    from braindecode.torch_ext.constraints import MaxNormDefaultConstraint
-    from braindecode.experiments.monitors import LossMonitor, MisclassMonitor, \
-        RuntimeMonitor, CroppedTrialMisclassMonitor
-
     monitors = [LossMonitor(), MisclassMonitor(col_suffix='sample_misclass'),
                 CroppedTrialMisclassMonitor(
                     input_time_length=input_time_length), RuntimeMonitor()]
@@ -80,8 +83,6 @@ def run_experiment(
         model_constraint = MaxNormDefaultConstraint()
     else:
         model_constraint = None
-    import torch.nn.functional as F
-    import torch as th
     # change here this cell
     loss_function = lambda preds, targets: F.nll_loss(th.mean(preds, dim=2),
                                                       targets)
