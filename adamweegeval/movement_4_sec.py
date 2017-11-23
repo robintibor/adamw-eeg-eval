@@ -89,8 +89,7 @@ def load_train_valid_test(train_filename, test_filename, n_folds, i_test_fold,
     else:
         assert n_folds is None
         assert i_test_fold is None
-        if use_validation_set:
-            assert valid_set_fraction is not None
+        assert use_validation_set == (valid_set_fraction is not None)
 
     train_folder = '/home/schirrmr/data/BBCI-without-last-runs/'
     log.info("Loading train...")

@@ -22,7 +22,7 @@ def run_experiment(
         max_increase_epochs,
         np_th_seed):
     set_random_seeds(np_th_seed, cuda=True)
-    #torch.backends.cudnn.benchmark = True sometimes crashes?
+    torch.backends.cudnn.benchmark = True# sometimes crashes?
     if valid_set is not None:
         assert max_increase_epochs is not None
     n_classes = int(np.max(train_set.y) + 1)
@@ -63,8 +63,7 @@ def run_experiment(
         if scheduler_name == 'cosine':
             n_updates_per_epoch = sum(
                 [1 for _ in iterator.get_batches(train_set, shuffle=True)])
-            scheduler = CosineAnnealing(n_updates_per_epoch * max_epochs,
-                                        restart_after_end=False)
+            scheduler = CosineAnnealing(n_updates_per_epoch * max_epochs)
             optimizer = ScheduledOptimizer(scheduler, optimizer)
         else:
             raise ValueError("Unknown scheduler")

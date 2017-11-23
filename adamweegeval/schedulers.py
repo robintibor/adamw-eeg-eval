@@ -11,11 +11,11 @@ class ScheduledOptimizer(object):
         self.i_update = 0
 
     def step(self):
-        for group, inital_lr, initial_wd in zip(
+        for group, initial_lr, initial_wd in zip(
                 self.optimizer.param_groups,
                 self.initial_lrs,
                 self.initial_weight_decays):
-            group['lr'] = self.scheduler.get_lr(inital_lr, self.i_update)
+            group['lr'] = self.scheduler.get_lr(initial_lr, self.i_update)
             group['weight_decay'] = self.scheduler.get_weight_decay(
                 initial_wd, self.i_update)
         self.optimizer.step()
@@ -32,16 +32,19 @@ class ScheduledOptimizer(object):
 
 
 class CosineAnnealing(object):
-    def __init__(self, n_updates_per_period, restart_after_end):
+    """
+    TODO: make n_updates_per_period also accept array, if so
+    # make it use correct period and update nr...
+    """
+    def __init__(self, n_updates_per_period,):
         self.n_updates_per_period = n_updates_per_period
-        self.restart_after_end = restart_after_end
 
     def get_lr(self, initial_val, i_update):
-        if i_update >= self.n_updates_per_period and self.restart_after_end == False:
+        if i_update >= self.n_updates_per_period:
             raise ValueError("More updates ({:d}) than expected ({:d})".format(
                 i_update, self.n_updates_per_period))
         i_update = i_update % self.n_updates_per_period
-        fraction_period = i_update / float(self.n_updates_per_period)
+        fraction_period = i_update / np.float64(self.n_updates_per_period)
         return initial_val * (0.5 * np.cos(np.pi * fraction_period) + 0.5)
 
     def get_weight_decay(self, initial_val, i_update):
