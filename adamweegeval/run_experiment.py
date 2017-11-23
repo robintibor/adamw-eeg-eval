@@ -20,8 +20,6 @@ from adamweegeval.optimizers import AdamW
 from adamweegeval.schedulers import ScheduledOptimizer, CosineAnnealing
 
 
-
-
 def run_experiment(
         train_set, valid_set, test_set, model_name, optimizer_name,
         init_lr,

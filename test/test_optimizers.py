@@ -7,9 +7,9 @@ from adamweegeval.optimizers import AdamW
 
 def test_sanity_check_sgd():
     # sanity check SGD
-    w_var = np_to_var(3, dtype=np.float32)
-    x_var = np_to_var(2, dtype=np.float32)
-    y_var = np_to_var(100, dtype=np.float32)
+    w_var = np_to_var(3, dtype=np.float64)
+    x_var = np_to_var(2, dtype=np.float64)
+    y_var = np_to_var(100, dtype=np.float64)
     w_var = th.nn.Parameter(w_var.data)
 
     optim = SGD([w_var], lr=0.1)
