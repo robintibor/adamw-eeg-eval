@@ -29,7 +29,7 @@ def get_templates():
 def get_grid_param_list():
     dictlistprod = cartesian_dict_of_lists_product
     default_params = [{
-        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv/',
+        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-resnet/',
     }]
 
     train_test_filenames = [
@@ -100,7 +100,7 @@ def get_grid_param_list():
     # },
     ] + dictlistprod({
         'n_folds': [10],
-        'i_test_fold': list(range(10)),
+        'i_test_fold': list(range(7,10)),
         'test_on_eval_set': [False],
     })
 
@@ -116,6 +116,10 @@ def get_grid_param_list():
         'init_lr': 1e-3,
     }]
 
+    #adam_new_setup_params = [{
+    #
+    #}]
+
     new_setup_params = [{
         'valid_set_fraction': None,#0.8 for final eval
         'use_validation_set': False,
@@ -126,6 +130,10 @@ def get_grid_param_list():
         'weight_decay': 1e-5,
         'init_lr': 1e-3,
     }]
+
+    #lr_weight_decay_params =
+
+    both_setup_params = old_setup_params + new_setup_params
 
     seed_params = dictlistprod({
         'np_th_seed': [0,]#1,2,3,4
@@ -141,7 +149,7 @@ def get_grid_param_list():
 
 
     model_params = dictlistprod({
-        'model_name': ['deep', 'shallow']
+        'model_name': ['resnet']
     })
 
     debug_params = [{
@@ -153,7 +161,8 @@ def get_grid_param_list():
         train_test_filenames,
         data_split_params,
         #old_setup_params,
-        new_setup_params,
+        #new_setup_params,
+        both_setup_params,
         preproc_params,
         model_params,
         stop_params,

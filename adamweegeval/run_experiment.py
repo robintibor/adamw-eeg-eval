@@ -18,6 +18,7 @@ from braindecode.experiments.monitors import LossMonitor, MisclassMonitor, \
 
 from adamweegeval.optimizers import AdamW
 from adamweegeval.schedulers import ScheduledOptimizer, CosineAnnealing
+from adamweegeval.resnet import EEGResNet
 
 
 def run_experiment(
@@ -43,10 +44,15 @@ def run_experiment(
         model = ShallowFBCSPNet(
             n_chans, n_classes, input_time_length=input_time_length,
             final_conv_length=30).create_network()
+    elif model_name == 'resnet':
+        model = EEGResNet(n_chans, n_classes, input_time_length=input_time_length,
+                          final_pool_length=10, n_first_filters=48).create_network()
     else:
         raise ValueError("Unknown model name {:s}".format(model_name))
-    to_dense_prediction_model(model)
+    if model_name != 'resnet':
+        to_dense_prediction_model(model)
     model.cuda()
+    model.eval()
 
     out = model(np_to_var(train_set.X[:1, :, :input_time_length, None]).cuda())
 
