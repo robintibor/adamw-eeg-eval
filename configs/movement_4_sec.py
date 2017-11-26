@@ -29,7 +29,7 @@ def get_templates():
 def get_grid_param_list():
     dictlistprod = cartesian_dict_of_lists_product
     default_params = [{
-        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-resnet/',
+        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-corrected-lr/',
     }]
 
     train_test_filenames = [
@@ -100,7 +100,7 @@ def get_grid_param_list():
     # },
     ] + dictlistprod({
         'n_folds': [10],
-        'i_test_fold': list(range(7,10)),
+        'i_test_fold': list(range(9,10)),
         'test_on_eval_set': [False],
     })
 
@@ -116,24 +116,31 @@ def get_grid_param_list():
         'init_lr': 1e-3,
     }]
 
-    #adam_new_setup_params = [{
-    #
-    #}]
+    adam_new_setup_params = [{
+        'valid_set_fraction': None,
+        'use_validation_set': False,
+        'max_increase_epochs': None,
+        'optimizer_name': 'adam',
+        'scheduler_name': 'cosine', # just for now, then take this out into own dict
+        'use_norm_constraint': False,
+    }]
 
     new_setup_params = [{
         'valid_set_fraction': None,#0.8 for final eval
         'use_validation_set': False,
         'max_increase_epochs': None,
         'optimizer_name': 'adamw',
-        'scheduler_name': 'cosine',
+        'scheduler_name': None, # just for now, then take this out into own dict
         'use_norm_constraint': False,
-        'weight_decay': 1e-5,
-        'init_lr': 1e-3,
     }]
 
-    #lr_weight_decay_params =
+    lr_weight_decay_params = dictlistprod({
+        'init_lr':  np.array([1/64.0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
+        'weight_decay': np.array([1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0]) * 0.001,
 
-    both_setup_params = old_setup_params + new_setup_params
+    })
+
+    both_setup_params = adam_new_setup_params + new_setup_params
 
     seed_params = dictlistprod({
         'np_th_seed': [0,]#1,2,3,4
@@ -144,12 +151,12 @@ def get_grid_param_list():
     })
 
     stop_params = [{
-        'max_epochs': 800,
+        'max_epochs': 10,
     }]
 
 
     model_params = dictlistprod({
-        'model_name': ['resnet']
+        'model_name': ['deep', 'shallow','resnet']
     })
 
     debug_params = [{
@@ -163,6 +170,7 @@ def get_grid_param_list():
         #old_setup_params,
         #new_setup_params,
         both_setup_params,
+        lr_weight_decay_params,
         preproc_params,
         model_params,
         stop_params,
