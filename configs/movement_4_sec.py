@@ -29,7 +29,7 @@ def get_templates():
 def get_grid_param_list():
     dictlistprod = cartesian_dict_of_lists_product
     default_params = [{
-        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-corrected-lr/',
+        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-40-epoch/',
     }]
 
     train_test_filenames = [
@@ -73,22 +73,22 @@ def get_grid_param_list():
         'train_filename': 'MaVoMoSc1S001R01_ds10_1-11.BBCI.mat',
         'test_filename': 'MaVoMoSc1S001R12_ds10_1-2BBCI.mat'
     },
-    {
-        'train_filename': 'PiWiMoSc1S001R01_ds10_1-11.BBCI.mat',
-        'test_filename': 'PiWiMoSc1S001R12_ds10_1-2BBCI.mat'
-    },
-    {
-        'train_filename': 'RoBeMoSc03S001R01_ds10_1-9.BBCI.mat',
-        'test_filename': 'RoBeMoSc03S001R10_ds10_1-2BBCI.mat'
-    },
-    {
-        'train_filename': 'RoScMoSc1S001R01_ds10_1-11.BBCI.mat',
-        'test_filename': 'RoScMoSc1S001R12_ds10_1-2BBCI.mat'
-    },
-    {
-        'train_filename': 'StHeMoSc01S001R01_ds10_1-10.BBCI.mat',
-        'test_filename': 'StHeMoSc01S001R11_ds10_1-2BBCI.mat'
-    },
+    # {
+    #     'train_filename': 'PiWiMoSc1S001R01_ds10_1-11.BBCI.mat',
+    #     'test_filename': 'PiWiMoSc1S001R12_ds10_1-2BBCI.mat'
+    # },
+    # {
+    #     'train_filename': 'RoBeMoSc03S001R01_ds10_1-9.BBCI.mat',
+    #     'test_filename': 'RoBeMoSc03S001R10_ds10_1-2BBCI.mat'
+    # },
+    # {
+    #     'train_filename': 'RoScMoSc1S001R01_ds10_1-11.BBCI.mat',
+    #     'test_filename': 'RoScMoSc1S001R12_ds10_1-2BBCI.mat'
+    # },
+    # {
+    #     'train_filename': 'StHeMoSc01S001R01_ds10_1-10.BBCI.mat',
+    #     'test_filename': 'StHeMoSc01S001R11_ds10_1-2BBCI.mat'
+    # },
     ]
 
     # Final eval params first, other second
@@ -105,42 +105,43 @@ def get_grid_param_list():
     })
 
 
-    old_setup_params = [{
-        'valid_set_fraction': None,#0.8 for final eval
-        'use_validation_set': True,
-        'max_increase_epochs': 80,
-        'optimizer_name': 'adam',
-        'scheduler_name': None,
-        'use_norm_constraint': True,
-        'weight_decay': 0,
-        'init_lr': 1e-3,
-    }]
-
-    adam_new_setup_params = [{
-        'valid_set_fraction': None,
-        'use_validation_set': False,
-        'max_increase_epochs': None,
-        'optimizer_name': 'adam',
-        'scheduler_name': 'cosine', # just for now, then take this out into own dict
-        'use_norm_constraint': False,
-    }]
-
-    new_setup_params = [{
-        'valid_set_fraction': None,#0.8 for final eval
-        'use_validation_set': False,
-        'max_increase_epochs': None,
-        'optimizer_name': 'adamw',
-        'scheduler_name': None, # just for now, then take this out into own dict
-        'use_norm_constraint': False,
-    }]
-
-    lr_weight_decay_params = dictlistprod({
-        'init_lr':  np.array([1/64.0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
-        'weight_decay': np.array([1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0]) * 0.001,
-
+    adamw_adam_comparison_params = dictlistprod({
+        'valid_set_fraction': [None],
+        'use_validation_set': [False],
+        'max_increase_epochs': [None],
+        'use_norm_constraint': [False],
+        'optimizer_name': ['adam', 'adamw'],
+        'scheduler_name': ['cosine', None],
     })
 
-    both_setup_params = adam_new_setup_params + new_setup_params
+    # lr_weight_decay_params = dictlistprod({
+    #     'model_name': ['deep'],
+    #     'init_lr':  np.array([1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.01,
+    #     'weight_decay': np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0]) * 0.001,
+    # }) + dictlistprod({
+    #     'model_name': ['shallow'],
+    #     'init_lr':  np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
+    #     'weight_decay': np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0]) * 0.001,
+    # }) + dictlistprod({
+    #     'model_name': ['resnet'],
+    #     'init_lr':  np.array([1/128.0, 1/64.0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
+    #     'weight_decay': np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0, 2.0]) * 0.001,
+    # },
+    # )
+
+    lr_weight_decay_params = dictlistprod({
+        'model_name': ['deep'],
+        'init_lr':  np.array([1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.01,
+        'weight_decay': np.array([2.0]) * 0.001,
+    }) + dictlistprod({
+        'model_name': ['resnet'],
+        'init_lr':  np.array([1/128.0, 1/64.0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
+        'weight_decay': np.array([4.0]) * 0.001,
+    },
+    )
+
+
+
 
     seed_params = dictlistprod({
         'np_th_seed': [0,]#1,2,3,4
@@ -151,13 +152,9 @@ def get_grid_param_list():
     })
 
     stop_params = [{
-        'max_epochs': 10,
+        'max_epochs': 40,
     }]
 
-
-    model_params = dictlistprod({
-        'model_name': ['deep', 'shallow','resnet']
-    })
 
     debug_params = [{
         'debug': False,
@@ -167,12 +164,9 @@ def get_grid_param_list():
         default_params,
         train_test_filenames,
         data_split_params,
-        #old_setup_params,
-        #new_setup_params,
-        both_setup_params,
-        lr_weight_decay_params,
         preproc_params,
-        model_params,
+        adamw_adam_comparison_params,
+        lr_weight_decay_params,
         stop_params,
         seed_params,
         debug_params,
