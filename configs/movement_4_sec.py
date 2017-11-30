@@ -29,7 +29,7 @@ def get_templates():
 def get_grid_param_list():
     dictlistprod = cartesian_dict_of_lists_product
     default_params = [{
-        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-40-epoch/',
+        #'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-40-epoch/',
     }]
 
     train_test_filenames = [
@@ -114,51 +114,20 @@ def get_grid_param_list():
         'scheduler_name': ['cosine', None],
     })
 
-    # lr_weight_decay_params = dictlistprod({
-    #     'model_name': ['deep'],
-    #     'init_lr':  np.array([1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.01,
-    #     'weight_decay': np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0]) * 0.001,
-    # }) + dictlistprod({
-    #     'model_name': ['shallow'],
-    #     'init_lr':  np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
-    #     'weight_decay': np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0]) * 0.001,
-    # }) + dictlistprod({
-    #     'model_name': ['resnet'],
-    #     'init_lr':  np.array([1/128.0, 1/64.0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
-    #     'weight_decay': np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0, 2.0]) * 0.001,
-    # },
-    # )
-
-    # lr_weight_decay_params = dictlistprod({
-    #     'model_name': ['deep'],
-    #     'init_lr':  np.array([1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.01,
-    #     'weight_decay': np.array([2.0]) * 0.001,
-    # }) + dictlistprod({
-    #     'model_name': ['resnet'],
-    #     'init_lr':  np.array([1/128.0, 1/64.0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
-    #     'weight_decay': np.array([4.0]) * 0.001,
-    # },
-    # )
-
     lr_weight_decay_params = dictlistprod({
-        'model_name': ['resnet-he-uniform'],
-        'init_lr':  np.array([1/128.0, 1/64.0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
-        #'weight_decay': np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.001, # forgot 4.0 :((
-        'weight_decay': np.array([4.0]) * 0.001,
+        'model_name': ['deep'],
+        'init_lr':  np.array([1/4.0, 1/2.0, 1.0, 2.0]) * 0.01,
+        'weight_decay': np.array([0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.001,
+    }) + dictlistprod({
+        'model_name': ['shallow'],
+        'init_lr':  np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0,]) * 0.01,
+        'weight_decay': np.array([0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0]) * 0.001,
+    }) + dictlistprod({
+        'model_name': ['resnet-xavier-uniform'],
+        'init_lr':  np.array([ 1/32.0, 1/16.0, 1/8.0, 1/4.0,]) * 0.01,
+        'weight_decay': np.array([0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0, 8.0]) * 0.001,
     },
     )
-    # dictlistprod({
-    #     'model_name': ['resnet-xavier-uniform'],
-    #     'init_lr':  np.array([1/128.0, 1/64.0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
-    #     #'weight_decay': np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.001, # forgot 4.0 :((
-    #     'weight_decay': np.array([4.0]) * 0.001,
-    # },
-    # ) + dictlistprod({
-    #      'model_name': ['deep'],
-    #      'init_lr':  np.array([1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.01,
-    #      'weight_decay': np.array([4.0]) * 0.001,
-    #  })
-
 
 
     seed_params = dictlistprod({
@@ -170,7 +139,11 @@ def get_grid_param_list():
     })
 
     stop_params = [{
-        'max_epochs': 40,
+        'max_epochs': 80,
+        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-80-epoch/',
+    }, {
+        'max_epochs': 160,
+        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-160-epoch/',
     }]
 
 
