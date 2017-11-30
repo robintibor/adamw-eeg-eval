@@ -22,7 +22,8 @@ class EEGResNet(object):
                  nonlinearity=elu,
                  split_first_layer=True,
                  batch_norm_alpha=0.1,
-                 batch_norm_epsilon=1e-4,):
+                 batch_norm_epsilon=1e-4,
+                 conv_weight_init_fn=lambda w: init.kaiming_normal(w, a=0)):
         if final_pool_length == 'auto':
             assert input_time_length is not None
         assert first_filter_length % 2 == 1
@@ -143,25 +144,24 @@ class EEGResNet(object):
         model.add_module('softmax', nn.LogSoftmax())
         model.add_module('squeeze',  Expression(_squeeze_final_output))
 
-        # Initialization, xavier is same as in our paper...
-        # was default from lasagne
-        init.kaiming_normal(model.conv_time.weight, a=0)
-        # maybe no bias in case of no split layer and batch norm
-        if self.split_first_layer:
-            init.constant(model.conv_time.bias, 0)
-            init.kaiming_normal(model.conv_spat.weight, a=0)
 
-        init.constant(model.bnorm.weight, 1)
-        init.constant(model.bnorm.bias, 0)
-
-        # Residual Block initialization happens already in ResidualBlock
-
-        init.kaiming_normal(model.conv_classifier.weight, a=0)
-        init.constant(model.conv_classifier.bias, 0)
+        # Initialize all weights
+        model.apply(lambda module: weights_init(module, self.conv_weight_init_fn))
 
         # Start in eval mode
         model.eval()
         return model
+
+
+def weights_init(module, conv_weight_init_fn):
+    classname = module.__class__.__name__
+    if 'Conv' in classname and classname != "AvgPool2dWithConv":
+        conv_weight_init_fn(module.weight)
+        if module.bias is not None:
+            init.constant(module.bias, 0)
+    elif 'BatchNorm' in classname:
+        init.constant(module.weight, 1)
+        init.constant(module.bias, 0)
 
 
 # remove empty dim at end and potentially remove empty time dim
@@ -171,8 +171,6 @@ def _squeeze_final_output(x):
     x = x[:,:,:,0]
     if x.size()[2] == 1:
         x = x[:,:,0]
-    #print("mean squeeze", th.mean(th.abs(x)))
-    #assert False
     return x
 
 
@@ -214,27 +212,15 @@ class ResidualBlock(nn.Module):
         self.bn2 = nn.BatchNorm2d(
            out_num_filters, momentum=batch_norm_alpha,
             affine=True, eps=batch_norm_epsilon)
-        # continue from https://github.com/robintibor/braindevel/blob/master/braindecode/veganlasagne/residual_net.py#L57
-        # then make the forward method
-        # make sure to set dilations correctly in resnet network class
         # also see https://mail.google.com/mail/u/0/#search/ilya+joos/1576137dd34c3127
         # for resnet options as ilya used them
         self.nonlinearity = nonlinearity
-
-        for conv_layer in (self.conv_1, self.conv_2):
-            init.kaiming_normal(conv_layer.weight, a=0)
-            #init.xavier_uniform(conv_layer.weight, gain=1)
-            init.constant(conv_layer.bias, 0)
-        for bn_layer in (self.bn1, self.bn2):
-            init.constant(bn_layer.weight, 1)
-            init.constant(bn_layer.bias, 0)
 
 
     def forward(self, x):
         stack_1 = self.nonlinearity(self.bn1(self.conv_1(x)))
         stack_2 = self.bn2(self.conv_2(stack_1)) # next nonlin after sum
         if self.n_pad_chans != 0:
-            #print("padding...")
             zeros_for_padding = th.autograd.Variable(
                 th.zeros(x.size()[0], self.n_pad_chans // 2,
                          x.size()[2], x.size()[3]))
@@ -242,5 +228,4 @@ class ResidualBlock(nn.Module):
                 zeros_for_padding = zeros_for_padding.cuda()
             x = th.cat((zeros_for_padding, x, zeros_for_padding), dim=1)
         out = self.nonlinearity(x + stack_2)
-        #print("mean abs", th.mean(th.abs(x)))
         return out

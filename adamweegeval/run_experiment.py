@@ -44,12 +44,21 @@ def run_experiment(
         model = ShallowFBCSPNet(
             n_chans, n_classes, input_time_length=input_time_length,
             final_conv_length=30).create_network()
-    elif model_name == 'resnet':
-        model = EEGResNet(n_chans, n_classes, input_time_length=input_time_length,
-                          final_pool_length=10, n_first_filters=48).create_network()
+    elif model_name in ['resnet-he-uniform', 'resnet-he-normal',
+                        'resnet-xavier-normal', 'resnet-xavier-uniform']:
+        init_name = model_name.lstrip('resnet-')
+        from torch.nn import init
+        init_fn = {'he-uniform': lambda w: init.kaiming_uniform(w, a=0),
+                   'he-normal': lambda w: init.kaiming_normal(w, a=0),
+                   'xavier-uniform': lambda w: init.xavier_uniform(w, gain=1),
+                   'xavier-normal': lambda w: init.xavier_normal(w, gain=1)}[init_name]
+        model = EEGResNet(in_chans=n_chans, n_classes=n_classes,
+                          input_time_length=input_time_length,
+                          final_pool_length=10, n_first_filters=48,
+                          conv_weight_init_fn=init_fn).create_network()
     else:
         raise ValueError("Unknown model name {:s}".format(model_name))
-    if model_name != 'resnet':
+    if 'resnet' not in model_name:
         to_dense_prediction_model(model)
     model.cuda()
     model.eval()

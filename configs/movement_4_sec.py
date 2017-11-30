@@ -129,17 +129,35 @@ def get_grid_param_list():
     # },
     # )
 
+    # lr_weight_decay_params = dictlistprod({
+    #     'model_name': ['deep'],
+    #     'init_lr':  np.array([1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.01,
+    #     'weight_decay': np.array([2.0]) * 0.001,
+    # }) + dictlistprod({
+    #     'model_name': ['resnet'],
+    #     'init_lr':  np.array([1/128.0, 1/64.0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
+    #     'weight_decay': np.array([4.0]) * 0.001,
+    # },
+    # )
+
     lr_weight_decay_params = dictlistprod({
-        'model_name': ['deep'],
-        'init_lr':  np.array([1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.01,
-        'weight_decay': np.array([2.0]) * 0.001,
-    }) + dictlistprod({
-        'model_name': ['resnet'],
+        'model_name': ['resnet-he-uniform'],
         'init_lr':  np.array([1/128.0, 1/64.0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
+        #'weight_decay': np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.001, # forgot 4.0 :((
         'weight_decay': np.array([4.0]) * 0.001,
     },
     )
-
+    # dictlistprod({
+    #     'model_name': ['resnet-xavier-uniform'],
+    #     'init_lr':  np.array([1/128.0, 1/64.0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0]) * 0.01,
+    #     #'weight_decay': np.array([1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.001, # forgot 4.0 :((
+    #     'weight_decay': np.array([4.0]) * 0.001,
+    # },
+    # ) + dictlistprod({
+    #      'model_name': ['deep'],
+    #      'init_lr':  np.array([1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0]) * 0.01,
+    #      'weight_decay': np.array([4.0]) * 0.001,
+    #  })
 
 
 
