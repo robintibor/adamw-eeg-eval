@@ -26,6 +26,7 @@ def run_experiment(
         init_lr,
         scheduler_name,
         use_norm_constraint, weight_decay,
+        restarts,
         max_epochs,
         max_increase_epochs,
         np_th_seed):
@@ -33,6 +34,9 @@ def run_experiment(
     #torch.backends.cudnn.benchmark = True# sometimes crashes?
     if valid_set is not None:
         assert max_increase_epochs is not None
+    assert (max_epochs is None) != (restarts is None)
+    if max_epochs is None:
+        max_epochs = np.sum(restarts)
     n_classes = int(np.max(train_set.y) + 1)
     n_chans = int(train_set.X.shape[1])
     input_time_length = 1000
@@ -84,7 +88,11 @@ def run_experiment(
         if scheduler_name == 'cosine':
             n_updates_per_epoch = sum(
                 [1 for _ in iterator.get_batches(train_set, shuffle=True)])
-            scheduler = CosineAnnealing(n_updates_per_epoch * max_epochs)
+            if restarts is None:
+                n_updates_per_period = n_updates_per_epoch * max_epochs
+            else:
+                n_updates_per_period = np.array(restarts) * n_updates_per_epoch
+            scheduler = CosineAnnealing(n_updates_per_period)
             optimizer = ScheduledOptimizer(scheduler, optimizer)
         else:
             raise ValueError("Unknown scheduler")

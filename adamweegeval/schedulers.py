@@ -37,14 +37,25 @@ class CosineAnnealing(object):
     # make it use correct period and update nr...
     """
     def __init__(self, n_updates_per_period,):
-        self.n_updates_per_period = n_updates_per_period
+        if not hasattr(n_updates_per_period, '__len__'):
+            n_updates_per_period = [n_updates_per_period]
+        assert np.all(np.array(n_updates_per_period) > 0)
+        self.update_period_boundaries = np.cumsum(n_updates_per_period)
+        self.update_period_boundaries = np.concatenate((
+            [0], self.update_period_boundaries))
 
     def get_lr(self, initial_val, i_update):
-        if i_update >= self.n_updates_per_period:
-            raise ValueError("More updates ({:d}) than expected ({:d})".format(
-                i_update, self.n_updates_per_period))
-        i_update = i_update % self.n_updates_per_period
-        fraction_period = i_update / np.float64(self.n_updates_per_period)
+        assert i_update < self.update_period_boundaries[-1], (
+            "More updates ({:d}) than expected ({:d})".format(
+                i_update, self.update_period_boundaries[-1] - 1))
+        i_end_period = np.searchsorted(self.update_period_boundaries,
+                                       i_update, side='right')
+        assert i_end_period > 0
+        i_start_update = self.update_period_boundaries[i_end_period - 1]
+        i_end_update = self.update_period_boundaries[i_end_period]
+        i_update = i_update - i_start_update
+        n_updates_this_period = i_end_update - i_start_update
+        fraction_period = i_update / np.float64(n_updates_this_period)
         return initial_val * (0.5 * np.cos(np.pi * fraction_period) + 0.5)
 
     def get_weight_decay(self, initial_val, i_update):

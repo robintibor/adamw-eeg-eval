@@ -151,6 +151,7 @@ def run_4_sec_exp(train_filename, test_filename, n_folds,
                   i_test_fold, valid_set_fraction, use_validation_set,
                   low_cut_hz, model_name, optimizer_name, init_lr,
                   scheduler_name, use_norm_constraint,
+                    restarts,
                   weight_decay, max_epochs, max_increase_epochs,
                   np_th_seed,
                   debug):
@@ -162,7 +163,11 @@ def run_4_sec_exp(train_filename, test_filename, n_folds,
         use_validation_set=use_validation_set,
         low_cut_hz=low_cut_hz, debug=debug)
     if debug:
-        max_epochs = 4
+        if restarts is None:
+            max_epochs = 4
+        else:
+            assert max_epochs is None
+            restarts = [1,3,5]
 
     return run_experiment(
         train_set, valid_set, test_set,
@@ -171,6 +176,7 @@ def run_4_sec_exp(train_filename, test_filename, n_folds,
         scheduler_name=scheduler_name,
         use_norm_constraint=use_norm_constraint,
         weight_decay=weight_decay,
+        restarts=restarts,
         max_epochs=max_epochs,
         max_increase_epochs=max_increase_epochs,
         np_th_seed=np_th_seed, )
