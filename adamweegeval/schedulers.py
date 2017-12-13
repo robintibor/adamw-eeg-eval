@@ -54,6 +54,7 @@ class CosineAnnealing(object):
         i_start_update = self.update_period_boundaries[i_end_period - 1]
         i_end_update = self.update_period_boundaries[i_end_period]
         i_update = i_update - i_start_update
+        assert i_update >= 0
         n_updates_this_period = i_end_update - i_start_update
         fraction_period = i_update / np.float64(n_updates_this_period)
         return initial_val * (0.5 * np.cos(np.pi * fraction_period) + 0.5)

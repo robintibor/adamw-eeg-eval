@@ -112,39 +112,36 @@ def get_grid_param_list():
 
     adamw_adam_comparison_params = dictlistprod({
         'use_norm_constraint': [False],
-        'optimizer_name': [ 'adamw'],#'adam',
+        'optimizer_name': ['adam', 'adamw'],#'adam',adamw
     })
 
     scheduler_params = dictlistprod({
         'scheduler_name': ['cosine'],
-        'restarts': [[1,2,4,8,16]],
-        'save_folder': ['/home/schirrmr/data/models/adameegeval/4sec-cv-restarts-31/'],
+        'restarts': [[1,2,5,10,21,41,80,160]],
+        'save_folder': ['/home/schirrmr/data/models/adameegeval/4sec-cv-restarts-320/'],
     })
 
-    lr_weight_decay_params = dictlistprod({
-        'model_name': ['resnet-xavier-uniform'],
-        'init_lr':  np.array([ 1/32.0, 1/16.0, 1/8.0, 1/4.0,]) * 0.01,
-        'weight_decay': np.array([0, 1/32.0, 1/16.0, 1/8.0, 1/4.0, 1/2.0, 1.0, 2.0, 4.0, 8.0]) * 0.001,
-    },
-    )+ dictlistprod({
-        'model_name': ['shallow'],
-        'init_lr': np.array([1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, ]) * 0.01,
-        'weight_decay': np.array(
-            [0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0]) * 0.001,
-    })
-
-    # dictlistprod({
-    #     'model_name': ['deep'],
-    #     'init_lr': np.array([1 / 4.0, 1 / 2.0, 1.0, 2.0]) * 0.01,
-    #     'weight_decay': np.array(
-    #         [0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0, 2.0,
-    #          4.0]) * 0.001,
-    # }) + dictlistprod({
+    # lr_weight_decay_params =  dictlistprod({
     #     'model_name': ['shallow'],
     #     'init_lr': np.array([1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, ]) * 0.01,
     #     'weight_decay': np.array(
     #         [0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0]) * 0.001,
-    # }) +
+    # })
+
+    lr_weight_decay_params = dictlistprod({
+        'model_name': ['resnet-xavier-uniform'],
+        'init_lr': np.array([1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, ]) * 0.01,
+        'weight_decay': np.array(
+            [0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0, 2.0, 4.0,
+             8.0]) * 0.001,
+    },
+    ) + dictlistprod({
+        'model_name': ['deep'],
+        'init_lr': np.array([1 / 4.0, 1 / 2.0, 1.0, 2.0]) * 0.01,
+        'weight_decay': np.array(
+            [0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0, 2.0,
+             4.0]) * 0.001,
+    })
 
 
     seed_params = dictlistprod({
