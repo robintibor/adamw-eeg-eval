@@ -17,7 +17,8 @@ from braindecode.experiments.monitors import LossMonitor, MisclassMonitor, \
     RuntimeMonitor, CroppedTrialMisclassMonitor
 
 from adamweegeval.optimizers import AdamW
-from adamweegeval.schedulers import ScheduledOptimizer, CosineAnnealing
+from adamweegeval.schedulers import (ScheduledOptimizer, CosineAnnealing,
+                                     CutCosineAnnealing)
 from adamweegeval.resnet import EEGResNet
 
 
@@ -93,6 +94,17 @@ def run_experiment(
             else:
                 n_updates_per_period = np.array(restarts) * n_updates_per_epoch
             scheduler = CosineAnnealing(n_updates_per_period)
+            optimizer = ScheduledOptimizer(scheduler, optimizer)
+        elif scheduler_name == 'cut_cosine':
+            # TODO: integrate with if clause before, now just separate
+            # to avoid messing with code
+            n_updates_per_epoch = sum(
+                [1 for _ in iterator.get_batches(train_set, shuffle=True)])
+            if restarts is None:
+                n_updates_per_period = n_updates_per_epoch * max_epochs
+            else:
+                n_updates_per_period = np.array(restarts) * n_updates_per_epoch
+            scheduler = CutCosineAnnealing(n_updates_per_period)
             optimizer = ScheduledOptimizer(scheduler, optimizer)
         else:
             raise ValueError("Unknown scheduler")

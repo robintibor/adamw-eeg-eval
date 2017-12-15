@@ -110,9 +110,16 @@ def get_grid_param_list():
         'max_increase_epochs': None,
     }]
 
-    adamw_adam_comparison_params = dictlistprod({
-        'use_norm_constraint': [False],
-        'optimizer_name': ['adam', 'adamw'],#'adam',adamw
+    adamw_adam_comparison_params = [{
+        'use_norm_constraint': False,
+        'optimizer_name': 'adam',#'adam',adamw
+        'schedule_weight_decay': False,
+    }, {
+        'use_norm_constraint': False,
+        'optimizer_name': ['adam'],#'adam',adamw
+        'schedule_weight_decay': [False],
+
+
     })
 
     scheduler_params = dictlistprod({
