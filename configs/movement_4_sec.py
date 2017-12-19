@@ -28,9 +28,6 @@ def get_templates():
 
 def get_grid_param_list():
     dictlistprod = cartesian_dict_of_lists_product
-    default_params = [{
-        #'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-40-epoch/',
-    }]
 
     train_test_filenames = [
     {
@@ -114,28 +111,31 @@ def get_grid_param_list():
         'use_norm_constraint': False,
         'optimizer_name': 'adam',#'adam',adamw
         'schedule_weight_decay': False,
-    }, {
+    },
+        {
         'use_norm_constraint': False,
-        'optimizer_name': ['adam'],#'adam',adamw
-        'schedule_weight_decay': [False],
-
-
-    })
+        'optimizer_name': 'adamw',#'adam',adamw
+        'schedule_weight_decay': True,
+    }]
+    #                                + [
+    #     {
+    #     'use_norm_constraint': False,
+    #     'optimizer_name': 'adamw',#'adam',adamw
+    #     'schedule_weight_decay': True,
+    # }]
 
     scheduler_params = dictlistprod({
-        'scheduler_name': ['cosine'],
-        'restarts': [[1,2,5,10,21,41,80,160]],
-        'save_folder': ['/home/schirrmr/data/models/adameegeval/4sec-cv-restarts-320/'],
+        'scheduler_name': ['cosine', None],
+        'restarts':  [None],# [[1,2,5,10,21,41,80,160]],
+        #'save_folder': ['/home/schirrmr/data/models/adameegeval/4sec-cv-restarts-320/'],
     })
 
-    # lr_weight_decay_params =  dictlistprod({
-    #     'model_name': ['shallow'],
-    #     'init_lr': np.array([1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, ]) * 0.01,
-    #     'weight_decay': np.array(
-    #         [0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0]) * 0.001,
-    # })
-
-    lr_weight_decay_params = dictlistprod({
+    lr_weight_decay_params =  dictlistprod({
+        'model_name': ['shallow'],
+        'init_lr': np.array([1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, ]) * 0.01,
+        'weight_decay': np.array(
+            [0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0]) * 0.001,
+    }) +  dictlistprod({
         'model_name': ['resnet-xavier-uniform'],
         'init_lr': np.array([1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, ]) * 0.01,
         'weight_decay': np.array(
@@ -159,9 +159,29 @@ def get_grid_param_list():
         'low_cut_hz': [4]#0
     })
 
-    stop_params = [{
-        'max_epochs': None,
-    }]
+    stop_params = [
+    #    {'max_epochs': None},
+        {
+        'max_epochs': 20,
+        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-20-epoch-2/',
+    },
+        {
+        'max_epochs': 40,
+        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-40-epoch-2/',
+    },
+    #     {
+    #     'max_epochs': 80,
+    #     'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-80-epoch/',
+    # },
+    #     {
+    #     'max_epochs': 160,
+    #     'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-160-epoch/',
+    # },
+    # {
+    #     'max_epochs': 320,
+    #     'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-320-epoch/',
+    # },
+    ]
 
 
     debug_params = [{
@@ -169,7 +189,6 @@ def get_grid_param_list():
     }]
 
     grid_params = product_of_list_of_lists_of_dicts([
-        default_params,
         train_test_filenames,
         data_split_params,
         preproc_params,
@@ -198,7 +217,7 @@ def run(
         low_cut_hz, model_name, optimizer_name, init_lr,
         scheduler_name, use_norm_constraint,
         restarts,
-        weight_decay, max_epochs, max_increase_epochs,
+        weight_decay, schedule_weight_decay, max_epochs, max_increase_epochs,
         np_th_seed,
         debug):
     kwargs = locals()

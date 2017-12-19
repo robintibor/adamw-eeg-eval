@@ -27,6 +27,7 @@ def run_experiment(
         init_lr,
         scheduler_name,
         use_norm_constraint, weight_decay,
+        schedule_weight_decay,
         restarts,
         max_epochs,
         max_increase_epochs,
@@ -86,6 +87,7 @@ def run_experiment(
                                        seed=np_th_seed)
 
     if scheduler_name is not None:
+        assert schedule_weight_decay == (optimizer_name == 'adamw')
         if scheduler_name == 'cosine':
             n_updates_per_epoch = sum(
                 [1 for _ in iterator.get_batches(train_set, shuffle=True)])
@@ -94,7 +96,8 @@ def run_experiment(
             else:
                 n_updates_per_period = np.array(restarts) * n_updates_per_epoch
             scheduler = CosineAnnealing(n_updates_per_period)
-            optimizer = ScheduledOptimizer(scheduler, optimizer)
+            optimizer = ScheduledOptimizer(scheduler, optimizer,
+                                           schedule_weight_decay=schedule_weight_decay)
         elif scheduler_name == 'cut_cosine':
             # TODO: integrate with if clause before, now just separate
             # to avoid messing with code
@@ -105,7 +108,8 @@ def run_experiment(
             else:
                 n_updates_per_period = np.array(restarts) * n_updates_per_epoch
             scheduler = CutCosineAnnealing(n_updates_per_period)
-            optimizer = ScheduledOptimizer(scheduler, optimizer)
+            optimizer = ScheduledOptimizer(scheduler, optimizer,
+                                           schedule_weight_decay=schedule_weight_decay)
         else:
             raise ValueError("Unknown scheduler")
     monitors = [LossMonitor(), MisclassMonitor(col_suffix='sample_misclass'),
