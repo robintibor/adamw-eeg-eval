@@ -88,18 +88,17 @@ def get_grid_param_list():
     # },
     ]
 
-    # Final eval params first, other second
-    data_split_params = [
-    #                         {
-    #     'n_folds': None,
-    #     'i_test_fold': None,
-    #     'test_on_eval_set': True,
-    # },
-    ] + dictlistprod({
+    data_split_train_params =  dictlistprod({
         'n_folds': [10],
         'i_test_fold': list(range(9,10)),
         'test_on_eval_set': [False],
     })
+    # data_split_test_params = [
+    # {
+    #     'n_folds': None,
+    #     'i_test_fold': None,
+    #     'test_on_eval_set': True,
+    # }]
 
     no_early_stop_params = [{
         'valid_set_fraction': None,
@@ -109,50 +108,162 @@ def get_grid_param_list():
 
     adamw_adam_comparison_params = [{
         'use_norm_constraint': False,
-        'optimizer_name': 'adam',#'adam',adamw
+        'optimizer_name': 'adam',
         'schedule_weight_decay': False,
     },
         {
         'use_norm_constraint': False,
-        'optimizer_name': 'adamw',#'adam',adamw
+        'optimizer_name': 'adamw',
         'schedule_weight_decay': True,
     }]
-    #                                + [
-    #     {
-    #     'use_norm_constraint': False,
-    #     'optimizer_name': 'adamw',#'adam',adamw
-    #     'schedule_weight_decay': True,
-    # }]
 
     scheduler_params = dictlistprod({
-        'scheduler_name': ['cosine', None],
-        'restarts':  [None],# [[1,2,5,10,21,41,80,160]],
-        #'save_folder': ['/home/schirrmr/data/models/adameegeval/4sec-cv-restarts-320/'],
+        'scheduler_name': ['cosine', ],
+        'restarts':  [None],
     })
 
     lr_weight_decay_params =  dictlistprod({
-        'model_name': ['shallow'],
-        'init_lr': np.array([1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, ]) * 0.01,
+        'model_name': ['deep'],
+        'init_lr': np.array([1/8.0, 4.0, 8.0]) * 0.01,
         'weight_decay': np.array(
-            [0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0]) * 0.001,
+            [0, 1/64.0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0, 2.0,
+             4.0, 8.0]) * 0.001,}) + dictlistprod({
+        'model_name': ['deep'],
+        'init_lr': np.array(
+            [1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0, 2.0, 4.0, 8.0]) * 0.01,
+        'weight_decay': np.array(
+            [1/64.0, 8.0]) * 0.001, #8.0 possibly removable
+    }) + dictlistprod({
+        'model_name': ['shallow'],
+        'init_lr': np.array([1 / 128.0, 1/64.0, 1/2.0, ]) * 0.01,
+        'weight_decay': np.array(
+            [0, 1 / 128.0, 1/64.0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0, 2.0, 4.0]) * 0.001,
+    }) + dictlistprod({
+        'model_name': ['shallow'],
+        'init_lr': np.array([1 / 128.0, 1/64.0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1/2.0, ]) * 0.01,
+        'weight_decay': np.array(
+            [1/128.0, 1/64.0, 2.0, 4.0]) * 0.001,
     }) +  dictlistprod({
         'model_name': ['resnet-xavier-uniform'],
-        'init_lr': np.array([1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, ]) * 0.01,
+        'init_lr': np.array([1/128.0, 1/64.0, 1/2.0, 1 ]) * 0.01,
         'weight_decay': np.array(
             [0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0, 2.0, 4.0,
-             8.0]) * 0.001,
-    },
-    ) + dictlistprod({
-        'model_name': ['deep'],
-        'init_lr': np.array([1 / 4.0, 1 / 2.0, 1.0, 2.0]) * 0.01,
+             8.0, 16]) * 0.001,}) +  dictlistprod({
+        'model_name': ['resnet-xavier-uniform'],
+        'init_lr': np.array([1/128.0, 1/64.0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1/2.0, 1]) * 0.01,
         'weight_decay': np.array(
-            [0, 1 / 32.0, 1 / 16.0, 1 / 8.0, 1 / 4.0, 1 / 2.0, 1.0, 2.0,
-             4.0]) * 0.001,
+            [16.0]) * 0.001,
     })
+
+    # final_settings_params = [{
+    #     'max_epochs': 320,
+    #     'save_folder': '/home/schirrmr/data/models/adameegeval/final-no-restart/',
+    #     'use_norm_constraint': False,
+    #     'restarts': None,
+    # }]
+
+    # final_settings_variants = [
+    #     {
+    #         'model_name': 'deep',
+    #         'optimizer_name': 'adam',
+    #         'scheduler_name': None,
+    #         'schedule_weight_decay': False,
+    #         'init_lr': 0.5 * 0.01,
+    #         'weight_decay': (1/32.0) * 0.001,
+    #     },
+    #     {
+    #         'model_name': 'deep',
+    #         'optimizer_name': 'adam',
+    #         'scheduler_name': 'cosine',
+    #         'schedule_weight_decay': False,
+    #         'init_lr': 2.0 * 0.01,
+    #         'weight_decay': (1/8.0) * 0.001,
+    #     },
+    #     {
+    #         'model_name': 'deep',
+    #         'optimizer_name': 'adamw',
+    #         'scheduler_name': None,
+    #         'schedule_weight_decay': True,
+    #         'init_lr': 2.0 * 0.01,
+    #         'weight_decay': 0 * 0.001,
+    #     },
+    #     {
+    #         'model_name': 'deep',
+    #         'optimizer_name': 'adamw',
+    #         'scheduler_name': 'cosine',
+    #         'schedule_weight_decay': True,
+    #         'init_lr': 1.0 * 0.01,
+    #         'weight_decay': 0.5 * 0.001,
+    #     },
+    #     {
+    #         'model_name': 'shallow',
+    #         'optimizer_name': 'adam',
+    #         'scheduler_name': None,
+    #         'schedule_weight_decay': False,
+    #         'init_lr': (1/32.0) * 0.01,
+    #         'weight_decay': (1/32.0) * 0.001,
+    #     },
+    #     {
+    #         'model_name': 'shallow',
+    #         'optimizer_name': 'adam',
+    #         'scheduler_name': 'cosine',
+    #         'schedule_weight_decay': False,
+    #         'init_lr': (1/8.0) * 0.01,
+    #         'weight_decay': 1.0 * 0.001,
+    #     },
+    #     {
+    #         'model_name': 'shallow',
+    #         'optimizer_name': 'adamw',
+    #         'scheduler_name': None,
+    #         'schedule_weight_decay': True,
+    #         'init_lr': (1/32.0) * 0.01,
+    #         'weight_decay': (1/8.0) * 0.001,
+    #     },
+    #     {
+    #         'model_name': 'shallow',
+    #         'optimizer_name': 'adamw',
+    #         'scheduler_name': 'cosine',
+    #         'schedule_weight_decay': True,
+    #         'init_lr': (1/16.0) * 0.01,
+    #         'weight_decay': 0 * 0.001,
+    #     },
+    #     {
+    #         'model_name': 'resnet-xavier-uniform',
+    #         'optimizer_name': 'adam',
+    #         'scheduler_name': None,
+    #         'schedule_weight_decay': False,
+    #         'init_lr': (1/32.0) * 0.01,
+    #         'weight_decay': 0 * 0.001,
+    #     },
+    #     {
+    #         'model_name': 'resnet-xavier-uniform',
+    #         'optimizer_name': 'adam',
+    #         'scheduler_name': 'cosine',
+    #         'schedule_weight_decay': False,
+    #         'init_lr': (1/8.0) * 0.01,
+    #         'weight_decay': 2.0 * 0.001,
+    #     },
+    #     {
+    #         'model_name': 'resnet-xavier-uniform',
+    #         'optimizer_name': 'adamw',
+    #         'scheduler_name': None,
+    #         'schedule_weight_decay': True,
+    #         'init_lr': (1/16.0) * 0.01,
+    #         'weight_decay': (1/32.0) * 0.001,
+    #     },
+    #     {
+    #         'model_name': 'resnet-xavier-uniform',
+    #         'optimizer_name': 'adamw',
+    #         'scheduler_name': 'cosine',
+    #         'schedule_weight_decay': True,
+    #         'init_lr': (1/32.0) * 0.01,
+    #         'weight_decay': 2.0 * 0.001,
+    #     },
+    # ]
 
 
     seed_params = dictlistprod({
-        'np_th_seed': [0,]#1,2,3,4
+        'np_th_seed': [0]#0,1,2,3,4
     })
 
     preproc_params = dictlistprod({
@@ -160,7 +271,7 @@ def get_grid_param_list():
     })
 
     stop_params = [
-    #    {'max_epochs': None},
+    # #    {'max_epochs': None},
         {
         'max_epochs': 20,
         'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-20-epoch-2/',
@@ -169,18 +280,18 @@ def get_grid_param_list():
         'max_epochs': 40,
         'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-40-epoch-2/',
     },
-    #     {
-    #     'max_epochs': 80,
-    #     'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-80-epoch/',
-    # },
-    #     {
-    #     'max_epochs': 160,
-    #     'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-160-epoch/',
-    # },
-    # {
-    #     'max_epochs': 320,
-    #     'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-320-epoch/',
-    # },
+        {
+        'max_epochs': 80,
+        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-80-epoch/',
+    },
+        {
+        'max_epochs': 160,
+        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-160-epoch/',
+    },
+    {
+        'max_epochs': 320,
+        'save_folder': '/home/schirrmr/data/models/adameegeval/4sec-cv-lr-wd-320-epoch/',
+    },
     ]
 
 
@@ -190,7 +301,7 @@ def get_grid_param_list():
 
     grid_params = product_of_list_of_lists_of_dicts([
         train_test_filenames,
-        data_split_params,
+        data_split_train_params,
         preproc_params,
         no_early_stop_params,
         adamw_adam_comparison_params,
