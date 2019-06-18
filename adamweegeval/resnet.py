@@ -125,6 +125,10 @@ class EEGResNet(object):
         model.add_module('res_{:d}_{:d}'.format(i_block, 0),
                                  ResidualBlock(n_cur_filters, n_cur_filters,
                                                dilation=cur_dilation, ))
+        for i_layer in range(1, self.n_layers_per_block):
+            model.add_module('res_{:d}_{:d}'.format(i_block, i_layer),
+                             ResidualBlock(n_cur_filters, n_cur_filters,
+                                           dilation=cur_dilation))
 
 
 
